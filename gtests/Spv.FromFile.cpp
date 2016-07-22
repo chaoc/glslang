@@ -238,6 +238,7 @@ INSTANTIATE_TEST_CASE_P(
         "spv.qualifiers.vert",
         "spv.sampleMaskOverrideCoverage.frag",
         "spv.shaderBallot.comp",
+        "spv.shaderDrawParams.vert",
         "spv.shaderGroupVote.comp",
         "spv.shiftOps.frag",
         "spv.simpleFunctionCall.frag",
