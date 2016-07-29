@@ -1219,6 +1219,10 @@ bool TGlslangToSpvTraverser::visitUnary(glslang::TVisit /* visit */, glslang::TI
                 one = builder.makeFloatConstant(1.0F);
             else if (node->getBasicType() == glslang::EbtDouble)
                 one = builder.makeDoubleConstant(1.0);
+#ifdef AMD_EXTENSIONS
+            else if (node->getBasicType() == glslang::EbtFloat16)
+                one = builder.makeFloat16Constant(1.0F);
+#endif
             else if (node->getBasicType() == glslang::EbtInt64 || node->getBasicType() == glslang::EbtUint64)
                 one = builder.makeInt64Constant(1);
             else
@@ -1392,6 +1396,17 @@ bool TGlslangToSpvTraverser::visitAggregate(glslang::TVisit visit, glslang::TInt
     case glslang::EOpConstructDMat4x2:
     case glslang::EOpConstructDMat4x3:
     case glslang::EOpConstructDMat4x4:
+#ifdef AMD_EXTENSIONS
+    case glslang::EOpConstructF16Mat2x2:
+    case glslang::EOpConstructF16Mat2x3:
+    case glslang::EOpConstructF16Mat2x4:
+    case glslang::EOpConstructF16Mat3x2:
+    case glslang::EOpConstructF16Mat3x3:
+    case glslang::EOpConstructF16Mat3x4:
+    case glslang::EOpConstructF16Mat4x2:
+    case glslang::EOpConstructF16Mat4x3:
+    case glslang::EOpConstructF16Mat4x4:
+#endif
         isMatrix = true;
         // fall through
     case glslang::EOpConstructFloat:
@@ -1402,6 +1417,12 @@ bool TGlslangToSpvTraverser::visitAggregate(glslang::TVisit visit, glslang::TInt
     case glslang::EOpConstructDVec2:
     case glslang::EOpConstructDVec3:
     case glslang::EOpConstructDVec4:
+#ifdef AMD_EXTENSIONS
+    case glslang::EOpConstructFloat16:
+    case glslang::EOpConstructF16Vec2:
+    case glslang::EOpConstructF16Vec3:
+    case glslang::EOpConstructF16Vec4:
+#endif
     case glslang::EOpConstructBool:
     case glslang::EOpConstructBVec2:
     case glslang::EOpConstructBVec3:
@@ -1905,7 +1926,6 @@ spv::Id TGlslangToSpvTraverser::createInvertedSwizzle(spv::Decoration precision,
     return builder.createRvalueSwizzle(precision, convertGlslangToSpvType(node.getType()), parentResult, swizzle);
 }
 
-
 // Convert a glslang AST swizzle node to a swizzle vector for building SPIR-V.
 void TGlslangToSpvTraverser::convertSwizzle(const glslang::TIntermAggregate& node, std::vector<unsigned>& swizzle)
 {
@@ -1940,6 +1960,13 @@ spv::Id TGlslangToSpvTraverser::convertGlslangToSpvType(const glslang::TType& ty
     case glslang::EbtDouble:
         spvType = builder.makeFloatType(64);
         break;
+#ifdef AMD_EXTENSIONS
+    case glslang::EbtFloat16:
+        builder.addExtension(spv::E_SPV_AMD_gpu_shader_half_float);
+        builder.addCapability(spv::CapabilityFloat16);
+        spvType = builder.makeFloatType(16);
+        break;
+#endif
     case glslang::EbtBool:
         // "transparent" bool doesn't exist in SPIR-V.  The GLSL convention is
         // a 32-bit int where non-0 means true.
@@ -3044,7 +3071,11 @@ spv::Id TGlslangToSpvTraverser::createBinaryOperation(glslang::TOperator op, spv
                                                       glslang::TBasicType typeProxy, bool reduceComparison)
 {
     bool isUnsigned = typeProxy == glslang::EbtUint || typeProxy == glslang::EbtUint64;
+#ifdef AMD_EXTENSIONS
+    bool isFloat = typeProxy == glslang::EbtFloat || typeProxy == glslang::EbtDouble || typeProxy == glslang::EbtFloat16;
+#else
     bool isFloat = typeProxy == glslang::EbtFloat || typeProxy == glslang::EbtDouble;
+#endif
     bool isBool = typeProxy == glslang::EbtBool;
 
     spv::Op binOp = spv::OpNop;
@@ -3370,7 +3401,11 @@ spv::Id TGlslangToSpvTraverser::createUnaryOperation(glslang::TOperator op, spv:
     int extBuiltins = -1;
     int libCall = -1;
     bool isUnsigned = typeProxy == glslang::EbtUint || typeProxy == glslang::EbtUint64;
+#ifdef AMD_EXTENSIONS
+    bool isFloat = typeProxy == glslang::EbtFloat || typeProxy == glslang::EbtDouble || typeProxy == glslang::EbtFloat16;
+#else
     bool isFloat = typeProxy == glslang::EbtFloat || typeProxy == glslang::EbtDouble;
+#endif
 
     switch (op) {
     case glslang::EOpNegative:
@@ -3553,6 +3588,13 @@ spv::Id TGlslangToSpvTraverser::createUnaryOperation(glslang::TOperator op, spv:
     case glslang::EOpUnpackUint2x32:
         unaryOp = spv::OpBitcast;
         break;
+
+#ifdef AMD_EXTENSIONS
+    case glslang::EOpPackFloat2x16:
+    case glslang::EOpUnpackFloat2x16:
+        unaryOp = spv::OpBitcast;
+        break;
+#endif
 
     case glslang::EOpDPdx:
         unaryOp = spv::OpDPdx;
@@ -3750,22 +3792,40 @@ spv::Id TGlslangToSpvTraverser::createConversion(glslang::TOperator op, spv::Dec
         zero = makeSmearedConstant(zero, vectorSize);
         return builder.createBinOp(spv::OpFOrdNotEqual, destType, operand, zero);
 
+#ifdef AMD_EXTENSIONS
+    case glslang::EOpConvFloat16ToBool:
+        zero = builder.makeFloat16Constant(0.0F);
+        zero = makeSmearedConstant(zero, vectorSize);
+        return builder.createBinOp(spv::OpFOrdNotEqual, destType, operand, zero);
+#endif
+
     case glslang::EOpConvBoolToFloat:
         convOp = spv::OpSelect;
-        zero = builder.makeFloatConstant(0.0);
-        one  = builder.makeFloatConstant(1.0);
+        zero = builder.makeFloatConstant(0.0F);
+        one  = builder.makeFloatConstant(1.0F);
         break;
+
     case glslang::EOpConvBoolToDouble:
         convOp = spv::OpSelect;
         zero = builder.makeDoubleConstant(0.0);
         one  = builder.makeDoubleConstant(1.0);
         break;
+
+#ifdef AMD_EXTENSIONS
+    case glslang::EOpConvBoolToFloat16:
+        convOp = spv::OpSelect;
+        zero = builder.makeFloat16Constant(0.0F);
+        one = builder.makeFloat16Constant(1.0F);
+        break;
+#endif
+
     case glslang::EOpConvBoolToInt:
     case glslang::EOpConvBoolToInt64:
         zero = (op == glslang::EOpConvBoolToInt64) ? builder.makeInt64Constant(0) : builder.makeIntConstant(0);
         one  = (op == glslang::EOpConvBoolToInt64) ? builder.makeInt64Constant(1) : builder.makeIntConstant(1);
         convOp = spv::OpSelect;
         break;
+
     case glslang::EOpConvBoolToUint:
     case glslang::EOpConvBoolToUint64:
         zero = (op == glslang::EOpConvBoolToUint64) ? builder.makeUint64Constant(0) : builder.makeUintConstant(0);
@@ -3777,6 +3837,10 @@ spv::Id TGlslangToSpvTraverser::createConversion(glslang::TOperator op, spv::Dec
     case glslang::EOpConvIntToDouble:
     case glslang::EOpConvInt64ToFloat:
     case glslang::EOpConvInt64ToDouble:
+#ifdef AMD_EXTENSIONS
+    case glslang::EOpConvIntToFloat16:
+    case glslang::EOpConvInt64ToFloat16:
+#endif
         convOp = spv::OpConvertSToF;
         break;
 
@@ -3784,11 +3848,21 @@ spv::Id TGlslangToSpvTraverser::createConversion(glslang::TOperator op, spv::Dec
     case glslang::EOpConvUintToDouble:
     case glslang::EOpConvUint64ToFloat:
     case glslang::EOpConvUint64ToDouble:
+#ifdef AMD_EXTENSIONS
+    case glslang::EOpConvUintToFloat16:
+    case glslang::EOpConvUint64ToFloat16:
+#endif
         convOp = spv::OpConvertUToF;
         break;
 
     case glslang::EOpConvDoubleToFloat:
     case glslang::EOpConvFloatToDouble:
+#ifdef AMD_EXTENSIONS
+    case glslang::EOpConvDoubleToFloat16:
+    case glslang::EOpConvFloat16ToDouble:
+    case glslang::EOpConvFloatToFloat16:
+    case glslang::EOpConvFloat16ToFloat:
+#endif
         convOp = spv::OpFConvert;
         if (builder.isMatrixType(destType))
             return createUnaryMatrixOperation(convOp, precision, noContraction, destType, operand, typeProxy);
@@ -3798,6 +3872,10 @@ spv::Id TGlslangToSpvTraverser::createConversion(glslang::TOperator op, spv::Dec
     case glslang::EOpConvDoubleToInt:
     case glslang::EOpConvFloatToInt64:
     case glslang::EOpConvDoubleToInt64:
+#ifdef AMD_EXTENSIONS
+    case glslang::EOpConvFloat16ToInt:
+    case glslang::EOpConvFloat16ToInt64:
+#endif
         convOp = spv::OpConvertFToS;
         break;
 
@@ -3822,6 +3900,10 @@ spv::Id TGlslangToSpvTraverser::createConversion(glslang::TOperator op, spv::Dec
     case glslang::EOpConvDoubleToUint:
     case glslang::EOpConvFloatToUint64:
     case glslang::EOpConvDoubleToUint64:
+#ifdef AMD_EXTENSIONS
+    case glslang::EOpConvFloat16ToUint:
+    case glslang::EOpConvFloat16ToUint64:
+#endif
         convOp = spv::OpConvertFToU;
         break;
 
@@ -3991,7 +4073,11 @@ spv::Id TGlslangToSpvTraverser::createAtomicOperation(glslang::TOperator op, spv
 spv::Id TGlslangToSpvTraverser::createInvocationsOperation(glslang::TOperator op, spv::Id typeId, std::vector<spv::Id>& operands, glslang::TBasicType typeProxy)
 {
     bool isUnsigned = typeProxy == glslang::EbtUint || typeProxy == glslang::EbtUint64;
+#ifdef AMD_EXTENSIONS
+    bool isFloat = typeProxy == glslang::EbtFloat || typeProxy == glslang::EbtDouble || typeProxy == glslang::EbtFloat16;
+#else
     bool isFloat = typeProxy == glslang::EbtFloat || typeProxy == glslang::EbtDouble;
+#endif
 
     spv::Op opCode = spv::OpNop;
 
@@ -4189,7 +4275,11 @@ spv::Id TGlslangToSpvTraverser::CreateInvocationsVectorOperation(spv::Op op, spv
 spv::Id TGlslangToSpvTraverser::createMiscOperation(glslang::TOperator op, spv::Decoration precision, spv::Id typeId, std::vector<spv::Id>& operands, glslang::TBasicType typeProxy)
 {
     bool isUnsigned = typeProxy == glslang::EbtUint || typeProxy == glslang::EbtUint64;
+#ifdef AMD_EXTENSIONS
+    bool isFloat = typeProxy == glslang::EbtFloat || typeProxy == glslang::EbtDouble || typeProxy == glslang::EbtFloat16;
+#else
     bool isFloat = typeProxy == glslang::EbtFloat || typeProxy == glslang::EbtDouble;
+#endif
 
     spv::Op opCode = spv::OpNop;
     int extBuiltins = -1;
@@ -4734,6 +4824,11 @@ spv::Id TGlslangToSpvTraverser::createSpvConstantFromConstUnionArray(const glsla
             case glslang::EbtDouble:
                 spvConsts.push_back(builder.makeDoubleConstant(zero ? 0.0 : consts[nextConst].getDConst()));
                 break;
+#ifdef AMD_EXTENSIONS
+            case glslang::EbtFloat16:
+                spvConsts.push_back(builder.makeFloat16Constant(zero ? 0.0F : (float)consts[nextConst].getDConst()));
+                break;
+#endif
             case glslang::EbtBool:
                 spvConsts.push_back(builder.makeBoolConstant(zero ? false : consts[nextConst].getBConst()));
                 break;
@@ -4766,6 +4861,11 @@ spv::Id TGlslangToSpvTraverser::createSpvConstantFromConstUnionArray(const glsla
         case glslang::EbtDouble:
             scalar = builder.makeDoubleConstant(zero ? 0.0 : consts[nextConst].getDConst(), specConstant);
             break;
+#ifdef AMD_EXTENSIONS
+        case glslang::EbtFloat16:
+            scalar = builder.makeFloat16Constant(zero ? 0.0F : (float)consts[nextConst].getDConst(), specConstant);
+            break;
+#endif
         case glslang::EbtBool:
             scalar = builder.makeBoolConstant(zero ? false : consts[nextConst].getBConst(), specConstant);
             break;
