@@ -263,7 +263,6 @@ public:
 
     // Linkage related
     void addSymbolLinkageNodes(TIntermAggregate*& linkage, EShLanguage, TSymbolTable&);
-    void addSymbolLinkageNode(TIntermAggregate*& linkage, TSymbolTable&, const TString&);
     void addSymbolLinkageNode(TIntermAggregate*& linkage, const TSymbol&);
 
     bool setInvocations(int i) 
@@ -404,6 +403,7 @@ protected:
     bool promote(TIntermOperator*);
     bool promoteUnary(TIntermUnary&);
     bool promoteBinary(TIntermBinary&);
+    void addSymbolLinkageNode(TIntermAggregate*& linkage, TSymbolTable&, const TString&);
     
     const EShLanguage language;  // stage, known at construction time
     EShSource source;            // source language, known a bit later
