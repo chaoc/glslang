@@ -599,6 +599,10 @@ public:
         layoutFormat = ElfNone;
 
         layoutPushConstant = false;
+
+#ifdef NV_EXTENSIONS
+        layoutPassthrough = false;
+#endif
     }
     bool hasLayout() const
     {
@@ -651,6 +655,10 @@ public:
     TLayoutFormat layoutFormat                         :  8;
 
     bool layoutPushConstant;
+
+#ifdef NV_EXTENSIONS
+    bool layoutPassthrough;
+#endif
 
     bool hasUniformLayout() const
     {
@@ -1408,6 +1416,13 @@ public:
         return false;
     }
 
+#ifdef NV_EXTENSIONS
+    void setLayoutPassthrough(bool b)
+    {
+        qualifier.layoutPassthrough = b;
+    }
+#endif
+
     // Array editing methods.  Array descriptors can be shared across
     // type instances.  This allows all uses of the same array
     // to be updated at once.  E.g., all nodes can be explicitly sized
@@ -1534,6 +1549,10 @@ public:
                     p += snprintf(p, end - p, "constant_id=%d ", qualifier.layoutSpecConstantId);
                 if (qualifier.layoutPushConstant)
                     p += snprintf(p, end - p, "push_constant ");
+#ifdef NV_EXTENSIONS
+                if (qualifier.layoutPassthrough)
+                    p += snprintf(p, end - p, "passthrough ");
+#endif
 
                 p += snprintf(p, end - p, ") ");
             }

@@ -153,6 +153,7 @@ public:
         flattenUniformArrays(false),
 #ifdef NV_EXTENSIONS 
         layoutOverrideCoverage(false),
+        layoutPassthrough(false),
 #endif
         useUnknownFormat(false)
     {
@@ -393,6 +394,8 @@ public:
 #ifdef NV_EXTENSIONS 
     void setLayoutOverrideCoverage() { layoutOverrideCoverage = true; }
     bool getLayoutOverrideCoverage() const { return layoutOverrideCoverage; }
+    void setLayoutPassthrough() { layoutPassthrough = true; }
+    bool getLayoutPassthrough() const { return layoutPassthrough; }
 #endif
 
 protected:
@@ -457,6 +460,7 @@ protected:
 
 #ifdef NV_EXTENSIONS 
     bool layoutOverrideCoverage;
+    bool layoutPassthrough;
 #endif
 
     typedef std::list<TCall> TGraph;
