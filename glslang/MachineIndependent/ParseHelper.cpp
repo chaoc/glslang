@@ -604,7 +604,11 @@ void TParseContext::fixIoArraySize(const TSourceLoc& loc, TType& type)
 void TParseContext::ioArrayCheck(const TSourceLoc& loc, const TType& type, const TString& identifier)
 {
     if (! type.isArray() && ! symbolTable.atBuiltInLevel()) {
-        if (type.getQualifier().isArrayedIo(language))
+        if (type.getQualifier().isArrayedIo(language)
+#ifdef NV_EXTENSIONS  
+         && !type.getQualifier().layoutPassthrough
+#endif
+            )
             error(loc, "type must be an array:", type.getStorageQualifierString(), identifier.c_str());
     }
 }
@@ -3928,6 +3932,14 @@ void TParseContext::setLayoutQualifier(const TSourceLoc& loc, TPublicType& publi
                 publicType.shaderQualifiers.geometry = ElgTriangleStrip;
                 return;
             }
+#ifdef NV_EXTENSIONS       
+            if (id == "passthrough") {
+                requireExtensions(loc, 1, &E_SPV_NV_geometry_shader_passthrough, "geometry shader passthrough");
+                publicType.qualifier.layoutPassthrough = true;
+                return;
+            }
+#endif
+
         } else {
             assert(language == EShLangTessEvaluation);
 
@@ -4328,6 +4340,11 @@ void TParseContext::mergeObjectLayoutQualifiers(TQualifier& dst, const TQualifie
 
         if (src.layoutPushConstant)
             dst.layoutPushConstant = true;
+
+#ifdef NV_EXTENSIONS
+        if (src.layoutPassthrough)
+            dst.layoutPassthrough = true;
+#endif
     }
 }
 
