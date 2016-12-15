@@ -149,7 +149,8 @@ public:
 #ifdef NV_EXTENSIONS 
         layoutOverrideCoverage(false),
 #endif
-        flattenUniformArrays(false)
+        flattenUniformArrays(false),
+        useUnknownFormat(false)
     {
         localSize[0] = 1;
         localSize[1] = 1;
@@ -182,7 +183,9 @@ public:
     bool getAutoMapBindings()             const { return autoMapBindings; }
     void setFlattenUniformArrays(bool flatten)      { flattenUniformArrays = flatten; }
     bool getFlattenUniformArrays()        const { return flattenUniformArrays; }
-
+    void setNoStorageFormat(bool b)             { useUnknownFormat = b; }
+    bool getNoStorageFormat()             const { return useUnknownFormat; }
+    
     void setVersion(int v) { version = v; }
     int getVersion() const { return version; }
     void setProfile(EProfile p) { profile = p; }
@@ -405,6 +408,7 @@ protected:
     unsigned int shiftUboBinding;
     bool autoMapBindings;
     bool flattenUniformArrays;
+    bool useUnknownFormat;
 
     EProfile profile;
     int version;
