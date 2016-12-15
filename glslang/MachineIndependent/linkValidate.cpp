@@ -387,6 +387,7 @@ void TIntermediate::finalCheck(TInfoSink& infoSink)
             warn(infoSink, "Entry point not found");
     }
 
+
     if (numPushConstants > 1)
         error(infoSink, "Only one push_constant block is allowed per stage");
 

@@ -385,6 +385,7 @@ public:
     int addXfbBufferOffset(const TType&);
     unsigned int computeTypeXfbSize(const TType&, bool& containsDouble) const;
     static int getBaseAlignment(const TType&, int& size, int& stride, bool std140, bool rowMajor);
+    bool promote(TIntermOperator*);
 
 #ifdef NV_EXTENSIONS 
     void setLayoutOverrideCoverage() { layoutOverrideCoverage = true; }
@@ -405,10 +406,10 @@ protected:
     bool userOutputUsed() const;
     static int getBaseAlignmentScalar(const TType&, int& size);
     bool isSpecializationOperation(const TIntermOperator&) const;
-    bool promote(TIntermOperator*);
     bool promoteUnary(TIntermUnary&);
     bool promoteBinary(TIntermBinary&);
     void addSymbolLinkageNode(TIntermAggregate*& linkage, TSymbolTable&, const TString&);
+    bool promoteAggregate(TIntermAggregate&);
     
     const EShLanguage language;  // stage, known at construction time
     EShSource source;            // source language, known a bit later
