@@ -3388,6 +3388,7 @@ TSymbol* TParseContext::redeclareBuiltinVariable(const TSourceLoc& loc, const TS
                 if (! intermediate.setDepth(publicType.layoutDepth))
                     error(loc, "all redeclarations must use the same depth layout on", "redeclaration", symbol->getName().c_str());
             }
+
         }
 #ifdef NV_EXTENSIONS 
         else if (identifier == "gl_SampleMask") {
