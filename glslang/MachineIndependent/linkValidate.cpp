@@ -469,9 +469,9 @@ void TIntermediate::finalCheck(TInfoSink& infoSink, bool keepUncalled)
     case EShLangGeometry:
         if (inputPrimitive == ElgNone)
             error(infoSink, "At least one shader must specify an input layout primitive");
-        if (outputPrimitive == ElgNone && !getLayoutPassthrough())
+        if (outputPrimitive == ElgNone && !getGeoPassthroughEXT())
             error(infoSink, "At least one shader must specify an output layout primitive");
-        if (vertices == TQualifier::layoutNotSet && !getLayoutPassthrough())
+        if (vertices == TQualifier::layoutNotSet && !getGeoPassthroughEXT())
             error(infoSink, "At least one shader must specify a layout(max_vertices = value)");
         break;
     case EShLangFragment:

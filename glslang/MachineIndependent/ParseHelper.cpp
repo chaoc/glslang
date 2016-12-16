@@ -3463,6 +3463,20 @@ void TParseContext::redeclareBuiltinBlock(const TSourceLoc& loc, TTypeList& newT
     //  - remove unused members
     //  - ensure remaining qualifiers/types match
     TType& type = block->getWritableType();
+   
+#ifdef NV_EXTENSIONS
+    // if gl_PerVertex is redeclared for the purpose of passing through "gl_Position"
+    // for passthrough purpose, the redclared block should have the same qualifers as
+    // the current one
+    if (currentBlockQualifier.layoutPassthrough)
+    {
+        type.getQualifier().layoutPassthrough = currentBlockQualifier.layoutPassthrough;
+        type.getQualifier().storage = currentBlockQualifier.storage;
+        type.getQualifier().layoutStream = currentBlockQualifier.layoutStream;
+        type.getQualifier().layoutXfbBuffer = currentBlockQualifier.layoutXfbBuffer;
+    }
+#endif 
+
     TTypeList::iterator member = type.getWritableStruct()->begin();
     size_t numOriginalMembersFound = 0;
     while (member != type.getStruct()->end()) {
@@ -3936,7 +3950,7 @@ void TParseContext::setLayoutQualifier(const TSourceLoc& loc, TPublicType& publi
             if (id == "passthrough") {
                 requireExtensions(loc, 1, &E_SPV_NV_geometry_shader_passthrough, "geometry shader passthrough");
                 publicType.qualifier.layoutPassthrough = true;
-                intermediate.setLayoutPassthrough();
+                intermediate.setGeoPassthroughEXT();
                 return;
             }
 #endif

@@ -1416,12 +1416,6 @@ public:
         return false;
     }
 
-#ifdef NV_EXTENSIONS
-    void setLayoutPassthrough(bool b)
-    {
-        qualifier.layoutPassthrough = b;
-    }
-#endif
 
     // Array editing methods.  Array descriptors can be shared across
     // type instances.  This allows all uses of the same array
