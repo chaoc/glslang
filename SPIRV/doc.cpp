@@ -51,6 +51,9 @@ namespace spv {
 #ifdef AMD_EXTENSIONS
         #include "GLSL.ext.AMD.h"
 #endif
+#ifdef NV_EXTENSIONS
+        #include "GLSL.ext.NV.h"
+#endif
     }
 }
 
@@ -255,6 +258,10 @@ const char* DecorationString(int decoration)
 
 #ifdef AMD_EXTENSIONS
     case 4999: return "ExplicitInterpAMD";
+#endif
+#ifdef NV_EXTENSIONS
+    case 5248: return "OverrideCoverageNV";
+    case 5250: return "PassthroughNV";
 #endif
     }
 }
@@ -812,6 +819,10 @@ const char* CapabilityString(int info)
 
     case 4423: return "SubgroupBallotKHR";
     case 4427: return "DrawParameters";
+
+#ifdef NV_EXTENSIONS
+    case 5251: return "GeometryShaderPassthroughNV";
+#endif
     }
 }
 
