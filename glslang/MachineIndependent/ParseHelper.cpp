@@ -3310,6 +3310,7 @@ TSymbol* TParseContext::redeclareBuiltinVariable(const TSourceLoc& loc, const TS
         (identifier == "gl_Color"               && language == EShLangFragment)                     ||
 #ifdef NV_EXTENSIONS
          identifier == "gl_SampleMask"                                                              ||
+         identifier == "gl_Layer"                                                                   ||
 #endif
          identifier == "gl_TexCoord") {
 
@@ -3395,6 +3396,12 @@ TSymbol* TParseContext::redeclareBuiltinVariable(const TSourceLoc& loc, const TS
                 error(loc, "redeclaration only allowed for override_coverage layout", "redeclaration", symbol->getName().c_str());
             }
             intermediate.setLayoutOverrideCoverage();
+        }
+        else if (identifier == "gl_Layer") {
+            if (!publicType.layoutViewportRelative) {
+                error(loc, "redeclaration only allowed for viewport_relative layout", "redeclaration", symbol->getName().c_str());
+            }
+            intermediate.setLayoutViewportRelative();
         }
 #endif
 
@@ -4049,6 +4056,13 @@ void TParseContext::setLayoutQualifier(const TSourceLoc& loc, TPublicType& publi
             return;
         }
 #endif
+    }
+    if (language == EShLangVertex) {
+        if (id == "viewport_relative") {
+            requireExtensions(loc, 1, &E_GL_NV_viewport_array2, "view port array2");
+            publicType.shaderQualifiers.layoutViewportRelative = true;
+            return;
+        }
     }
     error(loc, "unrecognized layout identifier, or qualifier requires assignment (e.g., binding = 4)", id.c_str(), "");
 }

@@ -2702,6 +2702,12 @@ void TBuiltIns::initialize(int version, EProfile profile, const SpvVersion& spvV
                 "in int gl_DrawIDARB;"
                 );
         }
+        if (version >= 450)
+            stageBuiltins[EShLangVertex].append(
+                "out int gl_ViewportIndex;"
+                "out int gl_Layer;"
+                "out int gl_ViewportMask[];"
+            );
     } else {
         // ES profile
         if (version == 100) {
@@ -4276,9 +4282,18 @@ void TBuiltIns::identifyBuiltIns(int version, EProfile profile, const SpvVersion
             symbolTable.setVariableExtensions("gl_BaseInstanceARB", 1, &E_GL_ARB_shader_draw_parameters);
             symbolTable.setVariableExtensions("gl_DrawIDARB",       1, &E_GL_ARB_shader_draw_parameters);
 
-            BuiltInVariable("gl_BaseVertexARB",   EbvBaseVertex,   symbolTable);
-            BuiltInVariable("gl_BaseInstanceARB", EbvBaseInstance, symbolTable);
-            BuiltInVariable("gl_DrawIDARB",       EbvDrawId,       symbolTable);
+            symbolTable.setVariableExtensions("gl_Layer",           Num_viewportEXTs, viewportEXTs);
+            symbolTable.setVariableExtensions("gl_ViewportIndex",   Num_viewportEXTs, viewportEXTs);
+
+            symbolTable.setVariableExtensions("gl_ViewportMask",    1, &E_GL_NV_viewport_array2);
+
+            BuiltInVariable("gl_BaseVertexARB",   EbvBaseVertex,    symbolTable);
+            BuiltInVariable("gl_BaseInstanceARB", EbvBaseInstance,  symbolTable);
+            BuiltInVariable("gl_DrawIDARB",       EbvDrawId,        symbolTable);
+
+            BuiltInVariable("gl_Layer",           EbvLayer,         symbolTable);
+            BuiltInVariable("gl_ViewportIndex",   EbvViewportIndex, symbolTable);
+            BuiltInVariable("gl_ViewportMask",    EbvViewportMaskNV,symbolTable);
         }
 
         if (profile != EEsProfile) {

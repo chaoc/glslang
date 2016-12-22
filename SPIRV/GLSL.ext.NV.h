@@ -30,9 +30,10 @@
 enum BuiltIn;
 enum Decoration;
 enum Op;
+enum Capability;
 
 static const int GLSLextNVVersion = 100;
-static const int GLSLextNVRevision = 2;
+static const int GLSLextNVRevision = 3;
 
 //SPV_NV_sample_mask_override_coverage
 const char* const E_SPV_NV_sample_mask_override_coverage = "SPV_NV_sample_mask_override_coverage";
@@ -46,4 +47,18 @@ const char* const E_SPV_NV_geometry_shader_passthrough = "SPV_NV_geometry_shader
 static const Decoration PassthroughNV = static_cast<Decoration>(5250);
 
 static const Capability GeometryShaderPassthroughNV = static_cast<Capability>(5251);
+
+
+//SPV_NV_viewport_array2
+const char* const E_SPV_NV_viewport_array2 = "SPV_NV_viewport_array2";
+const char* const E_ARB_shader_viewport_layer_array = "GL_ARB_shader_viewport_layer_array";
+
+static const Decoration ViewportRelativeNV = static_cast<Decoration>(5252);
+
+static const BuiltIn ViewportMaskNV = static_cast<BuiltIn>(5253);
+
+static const Capability ShaderViewportIndexLayerNV = static_cast<Capability>(5254);
+static const Capability ShaderViewportMaskNV       = static_cast<Capability>(5255);
+
+
 #endif  // #ifndef GLSLextNV_H
