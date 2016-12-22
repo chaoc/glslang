@@ -2677,7 +2677,10 @@ void TBuiltIns::initialize(int version, EProfile profile, const SpvVersion& spvV
             if (version >= 450)
                 stageBuiltins[EShLangVertex].append(
                     "float gl_CullDistance[];"
-                    );
+                    "int gl_ViewportIndex;"
+                    "int gl_Layer;"
+                    "int gl_ViewportMask[];"
+                );
             stageBuiltins[EShLangVertex].append(
                 "};"
                 "\n");
@@ -2805,6 +2808,11 @@ void TBuiltIns::initialize(int version, EProfile profile, const SpvVersion& spvV
             stageBuiltins[EShLangGeometry].append(
             "out int gl_ViewportIndex;"
             );
+
+        if (version >= 450)
+            stageBuiltins[EShLangGeometry].append(
+            "out int gl_ViewportMask[];"
+            );
         stageBuiltins[EShLangGeometry].append("\n");
     } else if (profile == EEsProfile && version >= 310) {
         stageBuiltins[EShLangGeometry].append(
@@ -2861,7 +2869,10 @@ void TBuiltIns::initialize(int version, EProfile profile, const SpvVersion& spvV
         if (version >= 450)
             stageBuiltins[EShLangTessControl].append(
                 "float gl_CullDistance[];"
-                );
+                "int gl_ViewportIndex;"
+                "int gl_Layer;"
+                "int gl_ViewportMask[];"
+            );
         stageBuiltins[EShLangTessControl].append(
             "} gl_out[];"
 
@@ -2926,7 +2937,10 @@ void TBuiltIns::initialize(int version, EProfile profile, const SpvVersion& spvV
         if (version >= 450)
             stageBuiltins[EShLangTessEvaluation].append(
                 "float gl_CullDistance[];"
-                );
+                "int gl_ViewportIndex;"
+                "int gl_Layer;"
+                "int gl_ViewportMask[];"
+            );
         stageBuiltins[EShLangTessEvaluation].append(
             "};"
             "\n");
@@ -4276,9 +4290,20 @@ void TBuiltIns::identifyBuiltIns(int version, EProfile profile, const SpvVersion
             symbolTable.setVariableExtensions("gl_BaseInstanceARB", 1, &E_GL_ARB_shader_draw_parameters);
             symbolTable.setVariableExtensions("gl_DrawIDARB",       1, &E_GL_ARB_shader_draw_parameters);
 
-            BuiltInVariable("gl_BaseVertexARB",   EbvBaseVertex,   symbolTable);
-            BuiltInVariable("gl_BaseInstanceARB", EbvBaseInstance, symbolTable);
-            BuiltInVariable("gl_DrawIDARB",       EbvDrawId,       symbolTable);
+            BuiltInVariable("gl_BaseVertexARB",   EbvBaseVertex,    symbolTable);
+            BuiltInVariable("gl_BaseInstanceARB", EbvBaseInstance,  symbolTable);
+            BuiltInVariable("gl_DrawIDARB",       EbvDrawId,        symbolTable);
+
+            if (language == EShLangVertex) {
+                symbolTable.setVariableExtensions("gl_Layer", Num_viewportEXTs, viewportEXTs);
+                symbolTable.setVariableExtensions("gl_ViewportIndex", Num_viewportEXTs, viewportEXTs);
+                BuiltInVariable("gl_Layer", EbvLayer, symbolTable);
+                BuiltInVariable("gl_ViewportIndex", EbvViewportIndex, symbolTable);
+            }
+
+            symbolTable.setVariableExtensions("gl_ViewportMask", 1, &E_GL_NV_viewport_array2);
+            BuiltInVariable("gl_ViewportMask", EbvViewportMaskNV, symbolTable);
+
         }
 
         if (profile != EEsProfile) {
@@ -4394,6 +4419,12 @@ void TBuiltIns::identifyBuiltIns(int version, EProfile profile, const SpvVersion
             BuiltInVariable("gl_BoundingBoxOES", EbvBoundingBox, symbolTable);
         }
 
+        if (language == EShLangTessControl) {
+            symbolTable.setVariableExtensions("gl_Layer", Num_viewportEXTs, viewportEXTs);
+            symbolTable.setVariableExtensions("gl_ViewportIndex", Num_viewportEXTs, viewportEXTs);
+            BuiltInVariable("gl_Layer", EbvLayer, symbolTable);
+            BuiltInVariable("gl_ViewportIndex", EbvViewportIndex, symbolTable);
+        }
         // Fall through
 
     case EShLangTessEvaluation:
@@ -4417,8 +4448,10 @@ void TBuiltIns::identifyBuiltIns(int version, EProfile profile, const SpvVersion
         BuiltInVariable("gl_PrimitiveIDIn",   EbvPrimitiveId,    symbolTable);
         BuiltInVariable("gl_PrimitiveID",     EbvPrimitiveId,    symbolTable);
         BuiltInVariable("gl_InvocationID",    EbvInvocationId,   symbolTable);
-        BuiltInVariable("gl_Layer",           EbvLayer,          symbolTable);
-        BuiltInVariable("gl_ViewportIndex",   EbvViewportIndex,  symbolTable);
+        if (language == EShLangGeometry) {
+            BuiltInVariable("gl_Layer", EbvLayer, symbolTable);
+            BuiltInVariable("gl_ViewportIndex", EbvViewportIndex, symbolTable);
+        }
         BuiltInVariable("gl_PatchVerticesIn", EbvPatchVertices,  symbolTable);
         BuiltInVariable("gl_TessLevelOuter",  EbvTessLevelOuter, symbolTable);
         BuiltInVariable("gl_TessLevelInner",  EbvTessLevelInner, symbolTable);
@@ -4427,6 +4460,12 @@ void TBuiltIns::identifyBuiltIns(int version, EProfile profile, const SpvVersion
         if (version < 410)
             symbolTable.setVariableExtensions("gl_ViewportIndex", 1, &E_GL_ARB_viewport_array);
 
+        if (language == EShLangTessEvaluation) {
+            symbolTable.setVariableExtensions("gl_Layer", Num_viewportEXTs, viewportEXTs);
+            symbolTable.setVariableExtensions("gl_ViewportIndex", Num_viewportEXTs, viewportEXTs);
+            BuiltInVariable("gl_Layer", EbvLayer, symbolTable);
+            BuiltInVariable("gl_ViewportIndex", EbvViewportIndex, symbolTable);
+        }
         // Compatibility variables
 
         BuiltInVariable("gl_in", "gl_ClipVertex",          EbvClipVertex,          symbolTable);
@@ -5108,6 +5147,9 @@ void TBuiltIns::identifyBuiltIns(int version, EProfile profile, const SpvVersion
         BuiltInVariable("gl_in", "gl_BackSecondaryColor",  EbvBackSecondaryColor,  symbolTable);
         BuiltInVariable("gl_in", "gl_TexCoord",            EbvTexCoord,            symbolTable);
         BuiltInVariable("gl_in", "gl_FogFragCoord",        EbvFogFragCoord,        symbolTable);
+
+        //BuiltInVariable("gl_in", "gl_Layer", EbvLayer, symbolTable);
+        //BuiltInVariable("gl_ViewportIndex", EbvViewportIndex, symbolTable);
         break;
 
     default:

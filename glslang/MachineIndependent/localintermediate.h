@@ -154,6 +154,7 @@ public:
 #ifdef NV_EXTENSIONS 
         layoutOverrideCoverage(false),
         geoPassthroughEXT(false),
+        layoutViewportRelative(false),
 #endif
         useUnknownFormat(false)
     {
@@ -396,6 +397,8 @@ public:
     bool getLayoutOverrideCoverage() const { return layoutOverrideCoverage; }
     void setGeoPassthroughEXT() { geoPassthroughEXT = true; }
     bool getGeoPassthroughEXT() const { return geoPassthroughEXT; }
+    void setLayoutViewportRelative() { layoutViewportRelative = true; }
+    bool getLayoutViewportRelative() const { return layoutViewportRelative; }
 #endif
 
 protected:
@@ -461,6 +464,7 @@ protected:
 #ifdef NV_EXTENSIONS 
     bool layoutOverrideCoverage;
     bool geoPassthroughEXT;
+    bool layoutViewportRelative;
 #endif
 
     typedef std::list<TCall> TGraph;
