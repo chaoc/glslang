@@ -4057,7 +4057,10 @@ void TParseContext::setLayoutQualifier(const TSourceLoc& loc, TPublicType& publi
         }
 #endif
     }
-    if (language == EShLangVertex) {
+    if (language == EShLangVertex ||
+        language == EShLangTessControl ||
+        language == EShLangTessEvaluation ||
+        language == EShLangGeometry ) {
         if (id == "viewport_relative") {
             requireExtensions(loc, 1, &E_GL_NV_viewport_array2, "view port array2");
             publicType.shaderQualifiers.layoutViewportRelative = true;

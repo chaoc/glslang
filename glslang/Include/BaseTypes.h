@@ -99,6 +99,7 @@ enum TStorageQualifier {
     EvqPosition,
     EvqPointSize,
     EvqClipVertex,
+    EvqLayer,
 
     // built-ins read by fragment shader
     EvqFace,

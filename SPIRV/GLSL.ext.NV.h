@@ -51,7 +51,7 @@ static const Capability GeometryShaderPassthroughNV = static_cast<Capability>(52
 
 //SPV_NV_viewport_array2
 const char* const E_SPV_NV_viewport_array2 = "SPV_NV_viewport_array2";
-const char* const E_ARB_shader_viewport_layer_array = "GL_ARB_shader_viewport_layer_array";
+const char* const E_ARB_shader_viewport_layer_array = "SPV_ARB_shader_viewport_layer_array";
 
 static const Decoration ViewportRelativeNV = static_cast<Decoration>(5252);
 

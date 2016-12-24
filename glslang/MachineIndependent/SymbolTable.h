@@ -541,6 +541,11 @@ public:
     //
     bool insert(TSymbol& symbol)
     {
+        
+        if (symbol.getName()== "gl_in")
+        {
+            return false;
+        }
         symbol.setUniqueId(++uniqueId);
 
         // make sure there isn't a function of this variable name
