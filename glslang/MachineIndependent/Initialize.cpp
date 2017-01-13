@@ -2866,6 +2866,13 @@ void TBuiltIns::initialize(int version, EProfile profile, const SpvVersion& spvV
                 "vec4 gl_TexCoord[];"
                 "float gl_FogFragCoord;"
                 );
+
+        stageBuiltins[EShLangTessControl].append(
+            "} gl_out[];"
+
+            "patch out float gl_TessLevelOuter[4];"
+            "patch out float gl_TessLevelInner[2];"
+            "\n");
         if (version >= 450)
             stageBuiltins[EShLangTessControl].append(
                 "float gl_CullDistance[];"
@@ -2873,12 +2880,6 @@ void TBuiltIns::initialize(int version, EProfile profile, const SpvVersion& spvV
                 "int gl_Layer;"
                 "int gl_ViewportMask[];"
             );
-        stageBuiltins[EShLangTessControl].append(
-            "} gl_out[];"
-
-            "patch out float gl_TessLevelOuter[4];"
-            "patch out float gl_TessLevelInner[2];"
-            "\n");
     } else {
         // Note:  "in gl_PerVertex {...} gl_in[gl_MaxPatchVertices];" is declared in initialize() below,
         // as it depends on the resource sizing of gl_MaxPatchVertices.
