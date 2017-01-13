@@ -482,7 +482,8 @@ void SpirvStream::disassembleInstruction(Id resultId, Id /*typeId*/, Op opCode, 
 #endif
 #ifdef NV_EXTENSIONS
                 }else if (strcmp(spv::E_SPV_NV_sample_mask_override_coverage, name) == 0 ||
-                          strcmp(spv::E_SPV_NV_geometry_shader_passthrough, name) == 0) {
+                          strcmp(spv::E_SPV_NV_geometry_shader_passthrough, name) == 0 ||
+                          strcmp(spv::E_SPV_NV_viewport_array2, name) == 0) {
                     extInstSet = GLSLextNVInst;
 #endif
                 }
@@ -656,11 +657,15 @@ static const char* GLSLextAMDGetDebugNames(const char* name, unsigned entrypoint
 static const char* GLSLextNVGetDebugNames(const char* name, unsigned entrypoint)
 {
     if (strcmp(name, spv::E_SPV_NV_sample_mask_override_coverage) == 0 ||
-        strcmp(name, spv::E_SPV_NV_geometry_shader_passthrough) == 0) {
+        strcmp(name, spv::E_SPV_NV_geometry_shader_passthrough) == 0 ||
+        strcmp(name, spv::E_ARB_shader_viewport_layer_array) == 0 ||
+        strcmp(name, spv::E_SPV_NV_viewport_array2) == 0){
         switch (entrypoint) {
         case OverrideCoverageNV:          return "OverrideCoverageNV";
         case PassthroughNV:               return "PassthroughNV";
         case GeometryShaderPassthroughNV: return "GeometryShaderPassthroughNV";
+        case ViewportRelativeNV:          return "ViewportRelativeNV";
+        case ShaderViewportMaskNV:        return "ShaderViewportMaskNV";
         default:                          return "Bad";
         }
     }

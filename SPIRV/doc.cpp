@@ -262,6 +262,7 @@ const char* DecorationString(int decoration)
 #ifdef NV_EXTENSIONS
     case 5248: return "OverrideCoverageNV";
     case 5250: return "PassthroughNV";
+    case 5252: return "ViewportRelativeNV";
 #endif
     }
 }
@@ -337,6 +338,9 @@ const char* BuiltInString(int builtIn)
     case 4996: return "BaryCoordSmoothCentroidAMD";
     case 4997: return "BaryCoordSmoothSampleAMD";
     case 4998: return "BaryCoordPullModelAMD";
+#endif
+#ifdef NV_EXTENSIONS
+    case 5253: return "ViewportMaskNV";
 #endif
     }
 }
@@ -822,8 +826,9 @@ const char* CapabilityString(int info)
 
 #ifdef NV_EXTENSIONS
     case 5251: return "GeometryShaderPassthroughNV";
+    case 5254: return "ShaderViewportIndexLayerNV";
+    case 5255: return "ShaderViewportMaskNV";
 #endif
-
     }
 }
 

@@ -482,6 +482,13 @@ spv::BuiltIn TGlslangToSpvTraverser::TranslateBuiltInDecoration(glslang::TBuiltI
 
     case glslang::EbvViewportIndex:
         builder.addCapability(spv::CapabilityMultiViewport);
+        if (glslangIntermediate->getStage() == EShLangVertex ||
+            glslangIntermediate->getStage() == EShLangTessControl ||
+            glslangIntermediate->getStage() == EShLangTessEvaluation)
+        {
+            builder.addExtension(spv::E_SPV_NV_viewport_array2);
+            builder.addCapability(spv::ShaderViewportIndexLayerNV);
+        }
         return spv::BuiltInViewportIndex;
 
     case glslang::EbvSampleId:
@@ -498,6 +505,13 @@ spv::BuiltIn TGlslangToSpvTraverser::TranslateBuiltInDecoration(glslang::TBuiltI
 
     case glslang::EbvLayer:
         builder.addCapability(spv::CapabilityGeometry);
+        if (glslangIntermediate->getStage() == EShLangVertex ||
+            glslangIntermediate->getStage() == EShLangTessControl ||
+            glslangIntermediate->getStage() == EShLangTessEvaluation)
+        {
+            builder.addExtension(spv::E_SPV_NV_viewport_array2);
+            builder.addCapability(spv::ShaderViewportIndexLayerNV);
+        }
         return spv::BuiltInLayer;
 
     case glslang::EbvPosition:             return spv::BuiltInPosition;
@@ -607,6 +621,13 @@ spv::BuiltIn TGlslangToSpvTraverser::TranslateBuiltInDecoration(glslang::TBuiltI
         builder.addExtension(spv::E_SPV_AMD_shader_explicit_vertex_parameter);
         return spv::BuiltInBaryCoordPullModelAMD;
 #endif
+
+#ifdef NV_EXTENSIONS
+    case glslang::EbvViewportMaskNV:
+        builder.addExtension(spv::E_SPV_NV_viewport_array2);
+        builder.addCapability(spv::ShaderViewportMaskNV);
+        return spv::ViewportMaskNV;
+#endif 
     default:                               return spv::BuiltInMax;
     }
 }
@@ -4742,6 +4763,20 @@ spv::Id TGlslangToSpvTraverser::getSymbolId(const glslang::TIntermSymbol* symbol
             builder.addExtension(spv::E_SPV_NV_sample_mask_override_coverage);
         }
     }
+    else if (builtIn == spv::BuiltInLayer) {
+        spv::Decoration decoration;
+        // GL_NV_sample_mask_override_coverage extension
+        if (glslangIntermediate->getLayoutViewportRelative())
+            decoration = (spv::Decoration)spv::ViewportRelativeNV;
+        else
+            decoration = (spv::Decoration)spv::DecorationMax;
+        addDecoration(id, decoration);
+        if (decoration != spv::DecorationMax) {
+            builder.addCapability(spv::ShaderViewportMaskNV);
+            builder.addExtension(spv::E_SPV_NV_viewport_array2);
+        }
+    }
+
     if (symbol->getQualifier().layoutPassthrough) {
         addDecoration(id, spv::PassthroughNV);
         builder.addCapability(spv::GeometryShaderPassthroughNV);

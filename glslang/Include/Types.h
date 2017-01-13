@@ -929,7 +929,8 @@ struct TShaderQualifiers {
 
 #ifdef NV_EXTENSIONS
     bool layoutOverrideCoverage;    // true if layout override_coverage set
-#endif
+    bool layoutViewportRelative;    // treu if layout viewport_relative set
+#endif 
 
     void init()
     {
@@ -952,6 +953,7 @@ struct TShaderQualifiers {
         blendEquation = false;
 #ifdef NV_EXTENSIONS
         layoutOverrideCoverage = false;
+        layoutViewportRelative = false;
 #endif
     }
 
@@ -992,7 +994,9 @@ struct TShaderQualifiers {
 #ifdef NV_EXTENSIONS
         if (src.layoutOverrideCoverage)
             layoutOverrideCoverage = src.layoutOverrideCoverage;
-#endif
+        if (src.layoutViewportRelative)
+            layoutViewportRelative = src.layoutViewportRelative;
+#endif 
     }
 };
 
