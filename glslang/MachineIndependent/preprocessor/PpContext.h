@@ -1,10 +1,10 @@
 //
-//Copyright (C) 2013 LunarG, Inc.
-//All rights reserved.
+// Copyright (C) 2013 LunarG, Inc.
+// All rights reserved.
 //
-//Redistribution and use in source and binary forms, with or without
-//modification, are permitted provided that the following conditions
-//are met:
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
 //
 //    Redistributions of source code must retain the above copyright
 //    notice, this list of conditions and the following disclaimer.
@@ -18,18 +18,18 @@
 //    contributors may be used to endorse or promote products derived
 //    from this software without specific prior written permission.
 //
-//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-//"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-//LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-//FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-//COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-//INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-//BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-//LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-//CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-//LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-//ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-//POSSIBILITY OF SUCH DAMAGE.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+// FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+// COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+// INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+// ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //
 /****************************************************************************\
 Copyright (c) 2002, NVIDIA Corporation.
@@ -56,7 +56,7 @@ Except as expressly stated in this notice, no other rights or licenses
 express or implied, are granted by NVIDIA herein, including but not
 limited to any patent rights that may be infringed by your derivative
 works or by other works in which the NVIDIA Software may be
-incorporated. No hardware is licensed hereunder. 
+incorporated. No hardware is licensed hereunder.
 
 THE NVIDIA SOFTWARE IS BEING PROVIDED ON AN "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED,
@@ -94,7 +94,7 @@ class TPpToken {
 public:
     TPpToken() : space(false), ival(0), dval(0.0), i64val(0)
     {
-        loc.init(); 
+        loc.init();
         name[0] = 0;
     }
 
@@ -113,6 +113,62 @@ public:
     double dval;
     long long i64val;
     char   name[MaxTokenLength + 1];
+};
+
+class TStringAtomMap {
+//
+// Implementation is in PpAtom.cpp
+//
+// Maintain a bi-directional mapping between relevant preprocessor strings and
+// "atoms" which a unique integers (small, contiguous, not hash-like) per string.
+//
+public:
+    TStringAtomMap();
+
+    // Map string -> atom.
+    // Return 0 if no existing string.
+    int getAtom(const char* s) const
+    {
+        auto it = atomMap.find(s);
+        return it == atomMap.end() ? 0 : it->second;
+    }
+
+    // Map a new or existing string -> atom, inventing a new atom if necessary.
+    int getAddAtom(const char* s)
+    {
+        int atom = getAtom(s);
+        if (atom == 0) {
+            atom = nextAtom++;
+            addAtomFixed(s, atom);
+        }
+        return atom;
+    }
+
+    // Map atom -> string.
+    const char* getString(int atom) const { return stringMap[atom]->c_str(); }
+
+protected:
+    TStringAtomMap(TStringAtomMap&);
+    TStringAtomMap& operator=(TStringAtomMap&);
+
+    TUnorderedMap<TString, int> atomMap;
+    TVector<const TString*> stringMap;    // these point into the TString in atomMap
+    int nextAtom;
+
+    // Bad source characters can lead to bad atoms, so gracefully handle those by
+    // pre-filling the table with them (to avoid if tests later).
+    TString badToken;
+
+    // Add bi-directional mappings:
+    //  - string -> atom
+    //  - atom -> string
+    void addAtomFixed(const char* s, int atom)
+    {
+        auto it = atomMap.insert(std::pair<TString, int>(s, atom)).first;
+        if (stringMap.size() < (size_t)atom + 1)
+            stringMap.resize(atom + 100, &badToken);
+        stringMap[atom] = &it->first;
+    }
 };
 
 class TInputScanner;
@@ -196,6 +252,7 @@ protected:
     TPpContext(TPpContext&);
     TPpContext& operator=(TPpContext&);
 
+    TStringAtomMap atomStrings;
     char*   preamble;               // string to parse, all before line 1 of string 0, it is 0 if no preamble
     int     preambleLength;
     char**  strings;                // official strings of shader, starting a string 0 line 1
@@ -230,7 +287,7 @@ protected:
 
     static const int maxIfNesting = 64;
 
-    int ifdepth;                  // current #if-#else-#endif nesting in the cpp.c file (pre-processor)    
+    int ifdepth;                  // current #if-#else-#endif nesting in the cpp.c file (pre-processor)
     bool elseSeen[maxIfNesting];  // Keep a track of whether an else has been seen at a particular depth
     int elsetracker;              // #if-#else and #endif constructs...Counter.
 
@@ -302,15 +359,16 @@ protected:
     int extraTokenCheck(int atom, TPpToken* ppToken, int token);
     int eval(int token, int precedence, bool shortCircuit, int& res, bool& err, TPpToken * ppToken);
     int evalToToken(int token, bool shortCircuit, int& res, bool& err, TPpToken * ppToken);
-    int CPPif (TPpToken * ppToken); 
+    int CPPif (TPpToken * ppToken);
     int CPPifdef(int defined, TPpToken * ppToken);
     int CPPinclude(TPpToken * ppToken);
-    int CPPline(TPpToken * ppToken); 
-    int CPPerror(TPpToken * ppToken); 
+    int CPPline(TPpToken * ppToken);
+    int CPPerror(TPpToken * ppToken);
     int CPPpragma(TPpToken * ppToken);
     int CPPversion(TPpToken * ppToken);
     int CPPextension(TPpToken * ppToken);
     int readCPPline(TPpToken * ppToken);
+    int scanHeaderName(TPpToken* ppToken, char delimit);
     TokenStream* PrescanMacroArg(TokenStream&, TPpToken*, bool newLineOkay);
     int MacroExpand(TPpToken* ppToken, bool expandUndef, bool newLineOkay);
 
@@ -325,7 +383,7 @@ protected:
     int ReadToken(TokenStream&, TPpToken*);
     void pushTokenStreamInput(TokenStream&, bool pasting = false);
     void UngetToken(int token, TPpToken*);
-    
+
     class tTokenInput : public tInput {
     public:
         tTokenInput(TPpContext* pp, TokenStream* t, bool prepasting) : tInput(pp), tokens(t), lastTokenPastes(prepasting) { }
@@ -383,7 +441,7 @@ protected:
                         return '\\';
                 } while (ch == '\\');
             }
-    
+
             // handle any non-escaped newline
             if (ch == '\r' || ch == '\n') {
                 if (ch == '\r' && input->peek() == '\n')
@@ -428,7 +486,7 @@ protected:
         TInputScanner* input;
     };
 
-    // Holds a reference to included file data, as well as a 
+    // Holds a reference to included file data, as well as a
     // prologue and an epilogue string. This can be scanned using the tInput
     // interface and acts as a single source string.
     class TokenizableIncludeFile : public tInput {
@@ -442,18 +500,18 @@ protected:
                           TPpContext* pp)
             : tInput(pp),
               prologue_(prologue),
-              includedFile_(includedFile),
               epilogue_(epilogue),
+              includedFile_(includedFile),
               scanner(3, strings, lengths, names, 0, 0, true),
               prevScanner(nullptr),
               stringInput(pp, scanner)
         {
               strings[0] = prologue_.data();
-              strings[1] = includedFile_->file_data;
+              strings[1] = includedFile_->headerData;
               strings[2] = epilogue_.data();
 
               lengths[0] = prologue_.size();
-              lengths[1] = includedFile_->file_length;
+              lengths[1] = includedFile_->headerLength;
               lengths[2] = epilogue_.size();
 
               scanner.setLine(startLoc.line);
@@ -494,7 +552,7 @@ protected:
         // Points to the IncludeResult that this TokenizableIncludeFile represents.
         TShader::Includer::IncludeResult* includedFile_;
 
-        // Will point to prologue_, includedFile_->file_data and epilogue_
+        // Will point to prologue_, includedFile_->headerData and epilogue_
         // This is passed to scanner constructor.
         // These do not own the storage and it must remain valid until this
         // object has been destroyed.
@@ -518,7 +576,7 @@ protected:
 
     void push_include(TShader::Includer::IncludeResult* result)
     {
-        currentSourceFile = result->file_name;
+        currentSourceFile = result->headerName;
         includeStack.push(result);
     }
 
@@ -530,7 +588,7 @@ protected:
         if (includeStack.empty()) {
             currentSourceFile = rootFileName;
         } else {
-            currentSourceFile = includeStack.top()->file_name;
+            currentSourceFile = includeStack.top()->headerName;
         }
     }
 
@@ -538,21 +596,6 @@ protected:
     std::string rootFileName;
     std::stack<TShader::Includer::IncludeResult*> includeStack;
     std::string currentSourceFile;
-
-    //
-    // From PpAtom.cpp
-    //
-    typedef TUnorderedMap<TString, int> TAtomMap;
-    typedef TVector<const TString*> TStringMap;
-
-    TAtomMap atomMap;
-    TStringMap stringMap;
-    int nextAtom;
-    void InitAtomTable();
-    void AddAtomFixed(const char* s, int atom);
-    int LookUpString(const char* s);
-    int LookUpAddString(const char* s);
-    const char* GetAtomString(int atom);
 };
 
 } // end namespace glslang

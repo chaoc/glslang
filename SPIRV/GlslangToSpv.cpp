@@ -1,12 +1,12 @@
 //
-//Copyright (C) 2014-2016 LunarG, Inc.
-//Copyright (C) 2015-2016 Google, Inc.
+// Copyright (C) 2014-2016 LunarG, Inc.
+// Copyright (C) 2015-2016 Google, Inc.
 //
-//All rights reserved.
+// All rights reserved.
 //
-//Redistribution and use in source and binary forms, with or without
-//modification, are permitted provided that the following conditions
-//are met:
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
 //
 //    Redistributions of source code must retain the above copyright
 //    notice, this list of conditions and the following disclaimer.
@@ -20,18 +20,18 @@
 //    contributors may be used to endorse or promote products derived
 //    from this software without specific prior written permission.
 //
-//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-//"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-//LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-//FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-//COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-//INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-//BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-//LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-//CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-//LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-//ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-//POSSIBILITY OF SUCH DAMAGE.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+// FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+// COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+// INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+// ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 
 //
 // Visit the nodes in the glslang intermediate tree representation to
@@ -221,7 +221,7 @@ spv::SourceLanguage TranslateSourceLanguage(glslang::EShSource source, EProfile 
             return spv::SourceLanguageUnknown;
         }
     case glslang::EShSourceHlsl:
-        //Use SourceLanguageUnknown instead of SourceLanguageHLSL for now, until Vulkan knows what HLSL is
+        // Use SourceLanguageUnknown instead of SourceLanguageHLSL for now, until Vulkan knows what HLSL is
         return spv::SourceLanguageUnknown;
     default:
         return spv::SourceLanguageUnknown;
@@ -438,7 +438,6 @@ spv::Decoration TranslateNoContractionDecoration(const glslang::TQualifier& qual
     else
         return spv::DecorationMax;
 }
-
 
 // Translate a glslang built-in variable to a SPIR-V built in decoration.  Also generate
 // associated capabilities when required.  For some built-in variables, a capability
@@ -1431,7 +1430,7 @@ bool TGlslangToSpvTraverser::visitAggregate(glslang::TVisit visit, glslang::TInt
     {
         if (node->isUserDefined())
             result = handleUserFunctionCall(node);
-        //assert(result);  // this can happen for bad shaders because the call graph completeness checking is not yet done
+        // assert(result);  // this can happen for bad shaders because the call graph completeness checking is not yet done
         if (result) {
             builder.clearAccessChain();
             builder.setAccessChainRValue(result);
@@ -1654,7 +1653,7 @@ bool TGlslangToSpvTraverser::visitAggregate(glslang::TVisit visit, glslang::TInt
 
                 // Does it need a swizzle inversion?  If so, evaluation is inverted;
                 // operate first on the swizzle base, then apply the swizzle.
-                if (glslangOperands[0]->getAsOperator() && 
+                if (glslangOperands[0]->getAsOperator() &&
                     glslangOperands[0]->getAsOperator()->getOp() == glslang::EOpVectorSwizzle)
                     invertedType = convertGlslangToSpvType(glslangOperands[0]->getAsBinaryNode()->getLeft()->getType());
             }
@@ -1981,7 +1980,7 @@ spv::Id TGlslangToSpvTraverser::getSampledType(const glslang::TSampler& sampler)
 // is applied.
 spv::Id TGlslangToSpvTraverser::getInvertedSwizzleType(const glslang::TIntermTyped& node)
 {
-    if (node.getAsOperator() && 
+    if (node.getAsOperator() &&
         node.getAsOperator()->getOp() == glslang::EOpVectorSwizzle)
         return convertGlslangToSpvType(node.getAsBinaryNode()->getLeft()->getType());
     else
@@ -2159,7 +2158,6 @@ spv::Id TGlslangToSpvTraverser::convertGlslangToSpvType(const glslang::TType& ty
 
     return spvType;
 }
-
 
 // Do full recursive conversion of a glslang structure (or block) type to a SPIR-V Id.
 // explicitLayout can be kept the same throughout the hierarchical recursive walk.
@@ -3033,7 +3031,7 @@ spv::Id TGlslangToSpvTraverser::createImageTextureFunctionCall(glslang::TIntermO
         }
         // copy the projective coordinate if we have to
         if (projTargetComp != projSourceComp) {
-            spv::Id projComp = builder.createCompositeExtract(params.coords, 
+            spv::Id projComp = builder.createCompositeExtract(params.coords,
                                                               builder.getScalarTypeId(builder.getTypeId(params.coords)),
                                                               projSourceComp);
             params.coords = builder.createCompositeInsert(projComp, params.coords,
@@ -4152,7 +4150,8 @@ spv::Id TGlslangToSpvTraverser::createInvocationsOperation(glslang::TOperator op
     spv::Op opCode = spv::OpNop;
 
     std::vector<spv::Id> spvGroupOperands;
-    if (op == glslang::EOpBallot || op == glslang::EOpReadFirstInvocation) {
+    if (op == glslang::EOpBallot || op == glslang::EOpReadFirstInvocation ||
+        op == glslang::EOpReadInvocation) {
         builder.addExtension(spv::E_SPV_KHR_shader_ballot);
         builder.addCapability(spv::CapabilitySubgroupBallotKHR);
     } else {
@@ -4192,7 +4191,7 @@ spv::Id TGlslangToSpvTraverser::createInvocationsOperation(glslang::TOperator op
     }
 
     case glslang::EOpReadInvocation:
-        opCode = spv::OpGroupBroadcast;
+        opCode = spv::OpSubgroupReadInvocationKHR;
         if (builder.isVectorType(typeId))
             return CreateInvocationsVectorOperation(opCode, typeId, operands);
         break;
@@ -4304,13 +4303,15 @@ spv::Id TGlslangToSpvTraverser::CreateInvocationsVectorOperation(spv::Op op, spv
     assert(op == spv::OpGroupFMin || op == spv::OpGroupUMin || op == spv::OpGroupSMin ||
            op == spv::OpGroupFMax || op == spv::OpGroupUMax || op == spv::OpGroupSMax ||
            op == spv::OpGroupFAdd || op == spv::OpGroupIAdd || op == spv::OpGroupBroadcast ||
+           op == spv::OpSubgroupReadInvocationKHR ||
            op == spv::OpGroupFMinNonUniformAMD || op == spv::OpGroupUMinNonUniformAMD || op == spv::OpGroupSMinNonUniformAMD ||
            op == spv::OpGroupFMaxNonUniformAMD || op == spv::OpGroupUMaxNonUniformAMD || op == spv::OpGroupSMaxNonUniformAMD ||
            op == spv::OpGroupFAddNonUniformAMD || op == spv::OpGroupIAddNonUniformAMD);
 #else
     assert(op == spv::OpGroupFMin || op == spv::OpGroupUMin || op == spv::OpGroupSMin ||
            op == spv::OpGroupFMax || op == spv::OpGroupUMax || op == spv::OpGroupSMax ||
-           op == spv::OpGroupFAdd || op == spv::OpGroupIAdd || op == spv::OpGroupBroadcast);
+           op == spv::OpGroupFAdd || op == spv::OpGroupIAdd || op == spv::OpGroupBroadcast ||
+           op == spv::OpSubgroupReadInvocationKHR);
 #endif
 
     // Handle group invocation operations scalar by scalar.
@@ -4330,13 +4331,16 @@ spv::Id TGlslangToSpvTraverser::CreateInvocationsVectorOperation(spv::Op op, spv
         std::vector<unsigned int> indexes;
         indexes.push_back(comp);
         spv::Id scalar = builder.createCompositeExtract(operands[0], scalarType, indexes);
-
         std::vector<spv::Id> spvGroupOperands;
-        spvGroupOperands.push_back(builder.makeUintConstant(spv::ScopeSubgroup));
-        if (op == spv::OpGroupBroadcast) {
+        if (op == spv::OpSubgroupReadInvocationKHR) {
+            spvGroupOperands.push_back(scalar);
+            spvGroupOperands.push_back(operands[1]);
+        } else if (op == spv::OpGroupBroadcast) {
+            spvGroupOperands.push_back(builder.makeUintConstant(spv::ScopeSubgroup));
             spvGroupOperands.push_back(scalar);
             spvGroupOperands.push_back(operands[1]);
         } else {
+            spvGroupOperands.push_back(builder.makeUintConstant(spv::ScopeSubgroup));
             spvGroupOperands.push_back(spv::GroupOperationReduce);
             spvGroupOperands.push_back(scalar);
         }
@@ -4746,7 +4750,7 @@ spv::Id TGlslangToSpvTraverser::getSymbolId(const glslang::TIntermSymbol* symbol
     if (builtIn != spv::BuiltInMax)
         addDecoration(id, spv::DecorationBuiltIn, (int)builtIn);
 
-#ifdef NV_EXTENSIONS 
+#ifdef NV_EXTENSIONS
     if (builtIn == spv::BuiltInSampleMask) {
           spv::Decoration decoration;
           // GL_NV_sample_mask_override_coverage extension
