@@ -175,6 +175,7 @@ const char* ExecutionModeString(int mode)
     case 31: return "ContractionOff";
     case 32: return "Bad";
 
+    case 4446:  return "PostDepthCoverage";
     case ExecutionModeCeiling:
     default: return "Bad";
     }
@@ -838,7 +839,8 @@ const char* CapabilityString(int info)
 
     case 4437: return "DeviceGroup";
     case 4439: return "MultiView";
-
+    
+    case 4447: return "SampleMaskPostDepthCoverage";
 #ifdef AMD_EXTENSIONS
     case 5009: return "ImageGatherBiasLodAMD";
 #endif
@@ -1587,7 +1589,7 @@ void Parameterize()
     ExecutionModeParams[ExecutionModePixelCenterInteger].caps.push_back(CapabilityShader);
     ExecutionModeParams[ExecutionModeOriginUpperLeft].caps.push_back(CapabilityShader);
     ExecutionModeParams[ExecutionModeOriginLowerLeft].caps.push_back(CapabilityShader);
-    ExecutionModeParams[ExecutionModeEarlyFragmentTests].caps.push_back(CapabilityShader);
+    ExecutionModeParams[ExecutionModePostDepthCoverage].caps.push_back(CapabilityShader);
     ExecutionModeParams[ExecutionModePointMode].caps.push_back(CapabilityTessellation);
     ExecutionModeParams[ExecutionModeXfb].caps.push_back(CapabilityTransformFeedback);
     ExecutionModeParams[ExecutionModeDepthReplacing].caps.push_back(CapabilityShader);
@@ -1610,6 +1612,7 @@ void Parameterize()
     ExecutionModeParams[ExecutionModeOutputTriangleStrip].caps.push_back(CapabilityGeometry);
     ExecutionModeParams[ExecutionModeVecTypeHint].caps.push_back(CapabilityKernel);
     ExecutionModeParams[ExecutionModeContractionOff].caps.push_back(CapabilityKernel);
+    ExecutionModeParams[ExecutionModeEarlyFragmentTests].caps.push_back(CapabilitySampleMaskPostDepthCoverage);
 
     DecorationParams[DecorationRelaxedPrecision].caps.push_back(CapabilityShader);
     DecorationParams[DecorationBlock].caps.push_back(CapabilityShader);

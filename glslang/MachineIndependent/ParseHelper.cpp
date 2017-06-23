@@ -4014,6 +4014,13 @@ void TParseContext::setLayoutQualifier(const TSourceLoc& loc, TPublicType& publi
             publicType.shaderQualifiers.earlyFragmentTests = true;
             return;
         }
+        if (id == "post_depth_coverage") {
+            profileRequires(loc, ENoProfile | ECoreProfile | ECompatibilityProfile, 420, E_GL_ARB_shader_image_load_store, "early_fragment_tests");
+            profileRequires(loc, EEsProfile, 310, nullptr, "post_depth_coverage");
+            requireExtensions(loc, Num_post_depth_coverageEXTs, post_depth_coverageEXTs, "post depth coverage");
+            publicType.shaderQualifiers.postDepthCoverage = true;
+            return;
+        }
         for (TLayoutDepth depth = (TLayoutDepth)(EldNone + 1); depth < EldCount; depth = (TLayoutDepth)(depth+1)) {
             if (id == TQualifier::getLayoutDepthString(depth)) {
                 requireProfile(loc, ECoreProfile | ECompatibilityProfile, "depth layout qualifier");
@@ -6273,6 +6280,12 @@ void TParseContext::updateStandaloneQualifierDefaults(const TSourceLoc& loc, con
             intermediate.setEarlyFragmentTests();
         else
             error(loc, "can only apply to 'in'", "early_fragment_tests", "");
+    }
+    if (publicType.shaderQualifiers.postDepthCoverage) {
+        if (publicType.qualifier.storage == EvqVaryingIn)
+            intermediate.setPostDepthCoverage();
+        else
+            error(loc, "can only apply to 'in'", "post_coverage_coverage", "");
     }
     if (publicType.shaderQualifiers.blendEquation) {
         if (publicType.qualifier.storage != EvqVaryingOut)

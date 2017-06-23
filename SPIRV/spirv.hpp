@@ -122,6 +122,7 @@ enum ExecutionMode {
     ExecutionModeOutputTriangleStrip = 29,
     ExecutionModeVecTypeHint = 30,
     ExecutionModeContractionOff = 31,
+    ExecutionModePostDepthCoverage = 4446,
     ExecutionModeMax = 0x7fffffff,
 };
 
@@ -628,6 +629,7 @@ enum Capability {
     CapabilityMultiView = 4439,
     CapabilityVariablePointersStorageBuffer = 4441,
     CapabilityVariablePointers = 4442,
+    CapabilitySampleMaskPostDepthCoverage = 4447,
     CapabilitySampleMaskOverrideCoverageNV = 5249,
     CapabilityGeometryShaderPassthroughNV = 5251,
     CapabilityShaderViewportIndexLayerNV = 5254,

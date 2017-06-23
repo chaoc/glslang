@@ -101,6 +101,9 @@ void TIntermediate::merge(TInfoSink& infoSink, TIntermediate& unit)
     if (! earlyFragmentTests)
         earlyFragmentTests = unit.earlyFragmentTests;
 
+    if (!postDepthCoverage)
+        postDepthCoverage = unit.postDepthCoverage;
+
     if (depthLayout == EldNone)
         depthLayout = unit.depthLayout;
     else if (depthLayout != unit.depthLayout)
