@@ -980,6 +980,11 @@ TGlslangToSpvTraverser::TGlslangToSpvTraverser(const glslang::TIntermediate* gls
         if (glslangIntermediate->getEarlyFragmentTests())
             builder.addExecutionMode(shaderEntry, spv::ExecutionModeEarlyFragmentTests);
 
+        if (glslangIntermediate->getPostDepthCoverage()) {
+            builder.addExecutionMode(shaderEntry, spv::ExecutionModePostDepthCoverage);
+            builder.addExtension(spv::E_SPV_KHR_post_depth_coverage);
+        }
+
         switch(glslangIntermediate->getDepth()) {
         case glslang::EldGreater:  mode = spv::ExecutionModeDepthGreater; break;
         case glslang::EldLess:     mode = spv::ExecutionModeDepthLess;    break;
